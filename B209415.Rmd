@@ -1,0 +1,198 @@
+---
+title: "B209415"
+output: pdf_document
+GIThub: https://github.com/B209415/B209415_assessment
+---
+The data used is test data from England accident and emergency attendances and admissions (ae_attendances_test) in CSV format.
+#It contains the following variables
+Reported attendances, four-hour breaches and admissions for all A&E departments in England for the years 2016/17 through 2018/19 (Apr-Mar). which is part  NHS data in CSV format.
+#Tool generation and data collection
+The tool that used for data collection from ae attendances test data was created using python injupyter. interactive widgets was loaded and used for tool creation.The codes on python was modified from 'Collecting data using interactive Jupyter widgets.ipynb'  Jupyter Notebook
+
+#New R markdown file was created 
+based on 'Loading NHSRdatasets.Rmd'. It contains: link to the GIThub repository,  Annotations that expain each step and code  
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## loadin pachages
+
+Firstly we will need to load all needed packages 
+
+```{r cars}
+library(tidyverse)
+library(readr)
+library(here)
+library(knitr)
+library(scales)
+library(lubridate)
+library(caret)
+
+```
+#Loading NHS data
+Here we will load NHS data used for our coding, data collection and analysis
+
+```{r cars}
+library(NHSRdatasets)
+library(readr)
+```
+
+```
+#Loading the data collected by python tool
+CD is abbreviation for created data, it will be used as a shortcut to call for the data
+
+
+```{r}
+
+CD <- read_csv("~/B209415/Data/createdData.csv")
+View(CD)
+
+```
+```
+#Know the class of the all data together
+The data is classified as tibble
+```{r}
+class(CD)
+```
+```
+#Look at the data
+This will show the data as well as the type of the data which important for analysis
+Data types in the collected data are: Index, attendances,breaches (decimal:numeric), period (date), consent (logical)
+All the data type are in the needed category so no need to reclass them
+
+
+```{r}
+glimpse(CD)
+
+```
+
+```
+#Data dictionary
+Here we will install and load the packages needed for creation of data dictionary
+
+```{r}
+install.packages('dataMeta')
+library(dataMeta)
+
+```
+
+#Now lets look at the data through glimpse funtion
+It give information on the length/type of data
+The data had 5 coloumns (variables), 11 raws (observations)
+The type of the variable are: index, attendences, breaches (decimal), period (date/numeric), consent (logical)
+```{r}
+glimpse(CD)
+```
+#here we will build and descripe our data frame
+
+```{r}
+variable_description <- c("The index column that allows us to link the data collected to the original ae_attendances data in the 'RawData' folder.",
+"The month that this activity relates to, stored as a date (1st of each month).",
+"The number of attendances for this department type at this organisation for this month.", 
+"The number of attendances that breached the four-hour target.",
+"The consent from the end-user to process and share the data collected with the data capture tool.")
+
+print(variable_description)
+
+```
+
+
+```{r}
+variable_type <- c(0, 1, 0, 0, 1)
+print(variable_type)
+```
+# Now using the build_linker funtion the data frame, variable discription and variable type will be linked into data dictionary
+
+```{r}
+linker<-build_linker(CD, variable_description, variable_type)
+print(linker)
+dictionary <- build_dict(my.data = CD, linker = linker)
+glimpse(dictionary)
+
+```
+now we will save our dictionary
+
+```{r}
+write_csv(dictionary, here("RawData", "CD_DD.csv"))
+
+```
+
+#Now the exploratory data analysis will start
+Summary statistics for attendances and breaches
+Mean, Standard deviation, Minimum and Maximum value
+
+
+```{r}
+#Table:summerize the attendences data
+tableA <- CD %>%
+drop_na(attendances) %>%
+  summarize(meanattendances = mean(attendances)
+            , SDattendances = sd(attendances), 
+            minattendances = min(attendances), 
+            maxattendances = max(attendances))
+tableA
+
+#tableB: summerize the breaches data
+tableB <- CD %>%
+  drop_na(attendances) %>%
+  summarize(meanbreaches = mean(breaches),
+            SDbreaches = sd(breaches), 
+            minbreaches = min(breaches), 
+            maxbreaches = max(breaches))
+tableB
+
+```
+
+#Showing the summary of attendences and breaches by year
+
+```{r}
+#TableC: shows the summary statstics for attendences by year
+tableC <- CD %>%
+  mutate_at(vars(period), format, "%y") %>%
+  group_by(period) %>%
+  summarize(meanattendances = mean(attendances),
+            SDattendances = sd(attendances), 
+            sumattendences = sum(attendances),
+            minattendances = min(attendances), 
+            maxattendances = max(attendances))
+tableC
+
+#TableC: shows the summary statstics for breaches by year
+tableD <- CD %>%
+  mutate_at(vars(period), format, "%y") %>%
+  group_by(period) %>%
+  summarize(meanbreaches = mean(breaches),
+            SDbreaches = sd(breaches), 
+            sumbreaches = sum(breaches),
+            minbreaches = min(breaches), 
+            maxbreaches = max(breaches))
+tableD
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+```
+
+```
+#Creation of graphs that shows the the attendances and breaches by year
+The period is in the x-axis, attendences in the y-axis, whie the size of the puple represent the number of breaches amonge attendences each year
+```{r pressure, echo=FALSE}
+plot(pressure)
+graph_B <- CD %>%
+  ggplot() +
+  geom_point(aes(period, attendances, size = breaches))
+graph_B
+```
+
+
