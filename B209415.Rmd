@@ -170,20 +170,6 @@ tableD <- CD %>%
 tableD
 ```
 
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-```
-
 ```
 #Creation of graphs that shows the the attendances and breaches by year
 The period is in the x-axis, attendences in the y-axis, whie the size of the puple represent the number of breaches amonge attendences each year
